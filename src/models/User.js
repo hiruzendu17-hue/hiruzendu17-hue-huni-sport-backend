@@ -7,7 +7,10 @@ const userSchema = new mongoose.Schema(
     passwordHash: { type: String, required: true },
     phone: { type: String, trim: true },
     role: { type: String, enum: ['admin', 'user'], default: 'user' },
-    avatar: { type: String, trim: true },
+    avatar: {
+      url: { type: String, default: '', trim: true },
+      public_id: { type: String, default: '', trim: true },
+    },
     favoriteTeam: { type: String, trim: true },
     shirtSize: { type: String, trim: true },
     shoeSize: { type: Number, min: 30, max: 60 },

@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const cloudinary = require('../config/cloudinary');
 
 const sanitizeProductPayload = (payload = {}) => {
   const data = { ...payload };
@@ -44,6 +45,15 @@ const toProductResponse = (product) => {
   delete obj.categories;
   delete obj.stockBySize;
   obj.quantity = typeof obj.stock === 'number' ? obj.stock : 0;
+  if (Array.isArray(obj.images)) {
+    obj.images = obj.images.map((img) => {
+      if (!img) return img;
+      if (typeof img === 'string') {
+        return { url: img, public_id: '' };
+      }
+      return { url: img.url || '', public_id: img.public_id || '' };
+    });
+  }
   return obj;
 };
 
@@ -96,6 +106,14 @@ exports.getById = async (req, res) => {
   }
 };
 
+const destroyImages = async (images = []) => {
+  const jobs = images
+    .map((img) => (typeof img === 'string' ? { public_id: '' } : img))
+    .filter((img) => img?.public_id)
+    .map((img) => cloudinary.uploader.destroy(img.public_id).catch(() => null));
+  await Promise.all(jobs);
+};
+
 exports.create = async (req, res) => {
   try {
     const data = sanitizeProductPayload(req.body);
@@ -106,6 +124,26 @@ exports.create = async (req, res) => {
 
     if (data.price === undefined || data.price === null) {
       return res.status(400).json({ success: false, error: 'Price required' });
+    }
+
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'hunisport/products', resource_type: 'image' },
+          (err, uploadResult) => {
+            if (err) return reject(err);
+            return resolve(uploadResult);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      data.images = [
+        {
+          url: result.secure_url,
+          public_id: result.public_id,
+        },
+      ];
     }
 
     const product = await Product.create(data);
@@ -119,10 +157,37 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const payload = sanitizeProductPayload(req.body);
-    const product = await Product.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
+
+    // Replace image if a new file is provided
+    if (req.file) {
+      await destroyImages(product.images);
+
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'hunisport/products', resource_type: 'image' },
+          (err, uploadResult) => {
+            if (err) return reject(err);
+            return resolve(uploadResult);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      payload.images = [
+        {
+          url: result.secure_url,
+          public_id: result.public_id,
+        },
+      ];
+    }
+
+    product.set(payload);
+    await product.save();
+
     return res.json({ success: true, product: toProductResponse(product) });
   } catch (error) {
     console.error('Update product error:', error);
@@ -132,10 +197,12 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
+    await destroyImages(product.images);
+    await product.deleteOne();
     return res.json({ success: true });
   } catch (error) {
     console.error('Delete product error:', error);
