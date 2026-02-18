@@ -38,6 +38,14 @@ exports.login = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        avatar: user.avatar,
+        favoriteTeam: user.favoriteTeam,
+        shirtSize: user.shirtSize,
+        shoeSize: user.shoeSize,
+        addresses: user.addresses,
+        settings: user.settings,
       },
     });
   } catch (error) {
@@ -66,6 +74,15 @@ exports.register = async (req, res) => {
       passwordHash,
       phone: phone ? String(phone).trim() : undefined,
       role: role === 'admin' ? 'admin' : 'user',
+      settings: {
+        emailNotifications: true,
+        smsNotifications: false,
+        orderUpdates: true,
+        promoEmails: true,
+        language: 'fr',
+        currency: 'FCFA',
+        theme: 'dark',
+      },
     });
 
     return res.status(201).json({
@@ -76,6 +93,13 @@ exports.register = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        avatar: user.avatar,
+        favoriteTeam: user.favoriteTeam,
+        shirtSize: user.shirtSize,
+        shoeSize: user.shoeSize,
+        settings: user.settings,
       },
     });
   } catch (error) {
@@ -104,6 +128,15 @@ exports.registerUser = async (req, res) => {
       passwordHash,
       phone: phone ? String(phone).trim() : undefined,
       role: 'user',
+      settings: {
+        emailNotifications: true,
+        smsNotifications: false,
+        orderUpdates: true,
+        promoEmails: true,
+        language: 'fr',
+        currency: 'FCFA',
+        theme: 'dark',
+      },
     });
 
     const token = buildToken(user);
@@ -117,6 +150,13 @@ exports.registerUser = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        avatar: user.avatar,
+        favoriteTeam: user.favoriteTeam,
+        shirtSize: user.shirtSize,
+        shoeSize: user.shoeSize,
+        settings: user.settings,
       },
     });
   } catch (error) {

@@ -15,4 +15,8 @@ const paymentLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Garantir l'unicité des TID renseignés (ignore documents sans transactionId)
+paymentLogSchema.index({ transactionId: 1 }, { unique: true, sparse: true });
+paymentLogSchema.index({ smsTimestamp: -1 });
+
 module.exports = mongoose.model('PaymentLog', paymentLogSchema);

@@ -37,6 +37,7 @@ const orderSchema = new mongoose.Schema(
       default: 'airtel_money',
     },
     paymentReference: { type: String },
+    paymentReceivedAt: { type: Date },
     paidAt: { type: Date },
     shippedAt: { type: Date },
     deliveredAt: { type: Date },

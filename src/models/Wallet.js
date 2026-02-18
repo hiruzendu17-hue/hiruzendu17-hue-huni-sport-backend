@@ -4,10 +4,15 @@ const transactionSchema = new mongoose.Schema(
   {
     type: { type: String, enum: ['deposit', 'withdrawal', 'purchase', 'refund'], required: true },
     amount: { type: Number, required: true },
-    status: { type: String, enum: ['pending', 'completed', 'failed'], default: 'completed' },
+    status: { type: String, enum: ['pending', 'completed', 'failed', 'refused', 'claim_pending'], default: 'completed' },
     method: { type: String, enum: ['airtel_money', 'wallet', 'system'], default: 'wallet' },
     reference: { type: String },
     description: { type: String },
+    claimInfo: {
+      depositNumber: { type: String },
+      tid: { type: String },
+      claimedAt: { type: Date },
+    },
     createdAt: { type: Date, default: Date.now },
     completedAt: { type: Date },
   },

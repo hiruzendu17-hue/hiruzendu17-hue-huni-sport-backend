@@ -2,10 +2,12 @@ const express = require('express');
 const orderController = require('../controllers/orderController');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
+const validate = require('../middleware/validate');
+const schemas = require('../validation/schemas');
 
 const router = express.Router();
 
-router.post('/', auth, orderController.create);
+router.post('/', auth, validate(schemas.orders.create), orderController.create);
 router.get('/', auth, admin, orderController.getAll);
 router.get('/my-orders', auth, orderController.getMyOrders);
 router.get('/:id', auth, admin, orderController.getById);
