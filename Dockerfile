@@ -12,11 +12,11 @@ COPY src ./src
 
 # Runtime env (override at deploy time)
 ENV NODE_ENV=production \
-    PORT=5000
+    PORT=3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD wget -qO- http://localhost:5000/api/status || exit 1
+  CMD wget -qO- http://localhost:3000/api/status || exit 1
 
-EXPOSE 5000
+EXPOSE 3000
 
 CMD ["node", "src/server.js"]

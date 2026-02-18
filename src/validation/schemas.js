@@ -69,6 +69,56 @@ const schemas = {
         paymentMethod: Joi.string().valid('airtel_money', 'cash', 'wallet').optional(),
       }),
     },
+    update: {
+      body: Joi.object({
+        customer: Joi.object({
+          phone: phone.optional(),
+          name: Joi.string().min(2).optional(),
+          email: email.optional(),
+          address: Joi.object({
+            city: Joi.string().allow('', null),
+            district: Joi.string().allow('', null),
+            details: Joi.string().allow('', null),
+          }).optional(),
+        }).optional(),
+        items: Joi.array()
+          .items(
+            Joi.object({
+              productId: Joi.string().optional(),
+              name: Joi.string().min(1).optional(),
+              price: Joi.number().min(0).optional(),
+              quantity: Joi.number().integer().min(1).optional(),
+              size: Joi.string().allow('', null),
+              shoeSize: Joi.number().min(20).max(60).optional(),
+              image: Joi.string().uri().optional(),
+            })
+          )
+          .optional(),
+        subtotal: Joi.number().min(0).optional(),
+        shipping: Joi.number().min(0).optional(),
+        total: Joi.number().min(0).optional(),
+        paymentMethod: Joi.string().valid('airtel_money', 'cash', 'wallet').optional(),
+        status: Joi.string()
+          .valid('pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'cancelled')
+          .optional(),
+        paymentReference: Joi.string().max(200).optional(),
+        paidAt: Joi.date().iso().optional(),
+        shippedAt: Joi.date().iso().optional(),
+        deliveredAt: Joi.date().iso().optional(),
+      }),
+    },
+    updateStatus: {
+      body: Joi.object({
+        status: Joi.string()
+          .valid('pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'cancelled')
+          .required(),
+      }),
+    },
+    markPaid: {
+      body: Joi.object({
+        paymentReference: Joi.string().max(200).optional(),
+      }),
+    },
   },
   wallet: {
     requestTopup: { body: Joi.object({ amount: Joi.number().positive().required() }) },
