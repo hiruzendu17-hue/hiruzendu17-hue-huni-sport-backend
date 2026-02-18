@@ -13,6 +13,7 @@ const orderRoutes = require('./routes/orders');
 const paymentRoutes = require('./routes/payments');
 const walletRoutes = require('./routes/wallet');
 const userRoutes = require('./routes/users');
+const uploadRoutes = require('./routes/upload');
 const ipAllowlist = require('./middleware/ipAllowlist');
 
 const app = express();
@@ -58,6 +59,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Metrics endpoint (must be protected by METRICS_SECRET)
 app.get('/api/metrics', ipAllowlist('METRICS_ALLOWED_IPS'), async (req, res) => {
