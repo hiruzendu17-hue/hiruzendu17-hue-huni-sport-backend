@@ -1,4 +1,10 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+// Optional override to bypass local DNS resolvers that refuse SRV/A queries.
+if (process.env.DNS_SERVERS) {
+  dns.setServers(process.env.DNS_SERVERS.split(',').map(s => s.trim()).filter(Boolean));
+}
 
 const connectDB = async () => {
   const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;

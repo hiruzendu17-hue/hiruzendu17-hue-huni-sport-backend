@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: huni-sport-backend
+    runtime: node
+    repo: https://github.com/hiruzendu17-hue/hiruzendu17-hue-huni-sport-backend
+    plan: starter
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_TO_FILE
+        value: false
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /api/status
