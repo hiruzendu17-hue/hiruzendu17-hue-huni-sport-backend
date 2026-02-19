@@ -1,25 +1,39 @@
 const cloudinary = require('cloudinary').v2;
 
-// Configure from explicit credentials or from CLOUDINARY_URL
-// (secure=true forces https URLs)
-const configureCloudinary = () => {
+// Configure from explicit credentials or from CLOUDINARY_URL.
+// If not configured, export a safe stub so the app can start but uploads will fail with a clear error.
+const missingConfig =
+  !process.env.CLOUDINARY_URL &&
+  !(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+
+if (missingConfig) {
+  console.warn('Cloudinary not configured: upload routes will fail until env vars are set');
+
+  module.exports = {
+    configured: false,
+    uploader: {
+      upload_stream: () => {
+        throw new Error('Cloudinary not configured');
+      },
+      upload: () => {
+        throw new Error('Cloudinary not configured');
+      },
+      destroy: () => {
+        throw new Error('Cloudinary not configured');
+      },
+    },
+  };
+} else {
   if (process.env.CLOUDINARY_URL) {
-    cloudinary.config({ secure: true }); // will parse CLOUDINARY_URL automatically
-    return;
+    cloudinary.config({ secure: true }); // parses CLOUDINARY_URL automatically
+  } else {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    });
   }
 
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-    throw new Error('Cloudinary not configured: set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET');
-  }
-  cloudinary.config({
-    cloud_name: CLOUDINARY_CLOUD_NAME,
-    api_key: CLOUDINARY_API_KEY,
-    api_secret: CLOUDINARY_API_SECRET,
-    secure: true,
-  });
-};
-
-configureCloudinary();
-
-module.exports = cloudinary;
+  module.exports = { ...cloudinary, configured: true };
+}

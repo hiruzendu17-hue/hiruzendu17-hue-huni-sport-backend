@@ -6,6 +6,7 @@ const productSchema = new mongoose.Schema(
     description: { type: String, trim: true },
     price: { type: Number, required: true, min: 0 },
     category: { type: String, required: true },
+    categories: [{ type: String, trim: true }],
     images: [
       {
         url: { type: String },
@@ -14,6 +15,11 @@ const productSchema = new mongoose.Schema(
     ],
     stock: { type: Number, default: 0, min: 0 },
     sizes: [{ type: String }],
+    stockBySize: {
+      type: Map,
+      of: Number,
+      default: undefined,
+    },
     featured: { type: Boolean, default: false },
     new: { type: Boolean, default: false },
     team: { type: String },

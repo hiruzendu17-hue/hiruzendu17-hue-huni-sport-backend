@@ -4,17 +4,24 @@ const cloudinary = require('../config/cloudinary');
 const sanitizeProductPayload = (payload = {}) => {
   const data = { ...payload };
 
-  // Backward compatibility: if old payload sends categories array, use the first value.
-  if (!data.category && Array.isArray(data.categories) && data.categories.length > 0) {
-    data.category = data.categories[0];
-  }
-
   if (typeof data.name === 'string') {
     data.name = data.name.trim();
   }
 
   if (typeof data.category === 'string') {
     data.category = data.category.trim();
+  }
+
+  if (Array.isArray(data.categories)) {
+    data.categories = data.categories
+      .map((c) => (typeof c === 'string' ? c.trim() : c))
+      .filter(Boolean);
+    if (data.categories.length === 0) {
+      delete data.categories;
+    } else if (!data.category) {
+      // Backward compatibility: si aucune category principale fournie, on prend la première sous-catégorie.
+      data.category = data.categories[0];
+    }
   }
 
   if (typeof data.description === 'string') {
@@ -34,16 +41,19 @@ const sanitizeProductPayload = (payload = {}) => {
   }
 
   delete data.quantity;
-  delete data.categories;
-  delete data.stockBySize;
+  // Stock par taille : on normalise en nombres
+  if (data.stockBySize && typeof data.stockBySize === 'object') {
+    Object.keys(data.stockBySize).forEach((key) => {
+      const val = Number(data.stockBySize[key]);
+      data.stockBySize[key] = Number.isNaN(val) ? 0 : val;
+    });
+  }
 
   return data;
 };
 
 const toProductResponse = (product) => {
   const obj = product.toObject ? product.toObject() : { ...product };
-  delete obj.categories;
-  delete obj.stockBySize;
   obj.quantity = typeof obj.stock === 'number' ? obj.stock : 0;
   if (Array.isArray(obj.images)) {
     obj.images = obj.images.map((img) => {
@@ -62,6 +72,9 @@ const buildFilter = (query) => {
   if (query.category) {
     filter.category = query.category;
   }
+  if (query.subcategory) {
+    filter.categories = query.subcategory;
+  }
   if (query.featured !== undefined) {
     filter.featured = query.featured === 'true';
   }
@@ -76,6 +89,9 @@ const buildFilter = (query) => {
       { category: { $regex: term, $options: 'i' } },
       { team: { $regex: term, $options: 'i' } },
       { league: { $regex: term, $options: 'i' } },
+      { categories: { $regex: term, $options: 'i' } },
+      { tags: { $regex: term, $options: 'i' } },
+      { brand: { $regex: term, $options: 'i' } },
     ];
   }
   return filter;
