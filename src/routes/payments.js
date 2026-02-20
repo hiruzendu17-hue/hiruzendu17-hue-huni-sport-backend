@@ -1,1 +1,12 @@
-const express = require('express');\nconst paymentController = require('../controllers/paymentController');\nconst auth = require('../middleware/auth');\nconst validate = require('../middleware/validate');\nconst schemas = require('../validation/schemas');\n\nconst router = express.Router();\n\nrouter.get('/check/:orderId', auth, validate(schemas.payments.check), paymentController.checkPayment);\n\nmodule.exports = router;\n
+const express = require('express');
+const paymentController = require('../controllers/paymentController');
+const auth = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const schemas = require('../validation/schemas');
+
+const router = express.Router();
+
+router.get('/check/:orderId', auth, validate(schemas.payments.check), paymentController.checkPayment);
+
+module.exports = router;
+

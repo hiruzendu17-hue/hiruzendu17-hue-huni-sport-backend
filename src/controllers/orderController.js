@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Wallet = require('../models/Wallet');
-const { normalizePhone } = require('../utils/smsParser');
+
+// Simplified phone normalizer (digits only, 9-15 chars)
+const normalizePhone = (phone) => {
+  if (!phone) return null;
+  const digits = String(phone).replace(/\D/g, '');
+  if (digits.length < 9 || digits.length > 15) return null;
+  return digits;
+};
 
 const ALLOWED_STATUSES = ['pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
 const ALLOWED_PAYMENT_METHODS = ['airtel_money', 'cash', 'wallet'];

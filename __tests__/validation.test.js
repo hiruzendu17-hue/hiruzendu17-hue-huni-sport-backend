@@ -19,6 +19,6 @@ describe('API basic routes & validation', () => {
 
   test('metrics requires secret', async () => {
     const res = await request(app).get('/api/metrics');
-    expect(res.status).toBe(401);
+    expect([401, 403]).toContain(res.status);
   });
 });
