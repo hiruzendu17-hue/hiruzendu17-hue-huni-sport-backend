@@ -25,13 +25,6 @@ const schemas = {
     },
   },
   payments: {
-    sms: {
-      body: Joi.object({
-        smsText: Joi.string().min(10).required(),
-        sender: Joi.string().allow('', null),
-        timestamp: Joi.date().iso().required(),
-      }),
-    },
     check: {
       params: Joi.object({ orderId: Joi.string().hex().length(24).required() }),
     },
