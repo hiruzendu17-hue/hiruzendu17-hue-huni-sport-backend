@@ -1,8 +1,38 @@
 const Product = require('../models/Product');
 const cloudinary = require('../config/cloudinary');
 
+const normalizeImagesInput = (images, fallbackPublicId = '') => {
+  if (!images) return undefined;
+
+  const list = Array.isArray(images) ? images : [images];
+
+  const normalized = list
+    .map((img) => {
+      if (!img) return null;
+      if (typeof img === 'string') {
+        return { url: img, public_id: fallbackPublicId };
+      }
+      if (typeof img === 'object') {
+        const url = img.url || img.secure_url || img.path || '';
+        const publicId = img.public_id || img.publicId || fallbackPublicId;
+        if (!url) return null;
+        return { url, public_id: publicId };
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  return normalized.length ? normalized : undefined;
+};
+
 const sanitizeProductPayload = (payload = {}) => {
   const data = { ...payload };
+
+  // Accept single image key from admin UI and normalize to images[]
+  if (data.image && !data.images) {
+    data.images = [data.image];
+  }
+  delete data.image;
 
   if (typeof data.name === 'string') {
     data.name = data.name.trim();
@@ -47,6 +77,13 @@ const sanitizeProductPayload = (payload = {}) => {
       const val = Number(data.stockBySize[key]);
       data.stockBySize[key] = Number.isNaN(val) ? 0 : val;
     });
+  }
+
+  const normalizedImages = normalizeImagesInput(data.images);
+  if (normalizedImages) {
+    data.images = normalizedImages;
+  } else {
+    delete data.images;
   }
 
   return data;
@@ -199,6 +236,9 @@ exports.update = async (req, res) => {
           public_id: result.public_id,
         },
       ];
+    } else if (payload.images !== undefined) {
+      const normalizedImages = normalizeImagesInput(payload.images);
+      payload.images = normalizedImages || [];
     }
 
     product.set(payload);
