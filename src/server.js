@@ -21,7 +21,7 @@ if (!isTest) {
   if (!hasMongo) {
     requireEnv(['MONGO_URI', 'MONGODB_URI']);
   }
-  requireEnv(['JWT_SECRET', 'PAYMENT_SMS_SECRET', 'METRICS_SECRET']);
+  requireEnv(['JWT_SECRET', 'METRICS_SECRET']);
 
   connectDB()
     .then(() => bootstrapAdmin())
