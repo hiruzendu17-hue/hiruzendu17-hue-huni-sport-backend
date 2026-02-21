@@ -137,7 +137,17 @@ const buildFilter = (query) => {
 exports.getAll = async (req, res) => {
   try {
     const filter = buildFilter(req.query);
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    const limit = Math.min(parseInt(req.query.limit, 10) || 200, 500);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .allowDiskUse(true)
+      .lean();
+
     const normalizedProducts = products.map(toProductResponse);
     return res.json({ success: true, products: normalizedProducts });
   } catch (error) {

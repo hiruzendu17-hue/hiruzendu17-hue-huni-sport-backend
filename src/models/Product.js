@@ -32,4 +32,11 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Indexes to avoid in-memory sorts and speed up common queries
+productSchema.index({ createdAt: -1 });
+productSchema.index({ category: 1, createdAt: -1 });
+productSchema.index({ featured: -1, createdAt: -1 });
+productSchema.index({ team: 1, createdAt: -1 });
+productSchema.index({ league: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Product', productSchema);
