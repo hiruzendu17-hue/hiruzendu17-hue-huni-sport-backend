@@ -28,6 +28,7 @@ const productSchema = new mongoose.Schema(
     type: { type: String },
     tags: [{ type: String }],
     brand: { type: String },
+    slug: { type: String, trim: true, index: true },
   },
   { timestamps: true }
 );

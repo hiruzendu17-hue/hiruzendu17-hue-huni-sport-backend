@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const { register } = require('./metrics');
 const traceId = require('./middleware/traceId');
@@ -28,6 +29,17 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(helmet());
+// Compress responses to reduce bandwidth (gzip/Brotli where supported)
+app.use(
+  compression({
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+  })
+);
 app.use(traceId);
 app.use(express.json({ limit: '10mb' }));
 
